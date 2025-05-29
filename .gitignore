@@ -1,0 +1,17 @@
+# Ignore virtual environment
+venv/
+.env/
+.venv/
+
+# Ignore pycache
+__pycache__/
+
+# Ignore local testing files
+local_testing/
+temp/
+
+# Ignore IDE files
+.vscode/
+
+# Ignore logs and misc. output
+*.log
