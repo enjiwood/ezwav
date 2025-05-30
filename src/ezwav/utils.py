@@ -1,7 +1,13 @@
 from typing import Sequence, List, Tuple, Union
 import warnings
+from enum import Enum
 
 Number = Union[int, float]
+
+class Time_Unit(Enum):
+    S = 1
+    MS = 1000
+    US = 1000000
 
 def normalize(
     values: Sequence[Number], 

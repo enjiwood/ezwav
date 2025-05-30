@@ -2,8 +2,7 @@ from scipy.io import wavfile
 import wave
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import normalize
-from typing import Tuple, Union
+from .utils import normalize, Time_Unit
 
 class Wav:
     """
@@ -45,7 +44,7 @@ class Wav:
         Initializes a list of amplitude values over time. Can normalize values and
         specify resolution in seconds, milliseconds, or microseconds.
     """
-    def __init__(self, file):
+    def __init__(self, file: str):
         try:
             self._file: str = file
             self._samplerate, self._data  = wavfile.read(self.file)
@@ -61,7 +60,7 @@ class Wav:
     def __len__(self):
         return int(self._duration)
     
-    def _split_channels(self, norm=False, absolute=False):
+    def _split_channels(self, norm: bool=False, absolute: bool=False):
         """
         Splits the audio data into separate channels with optional normalization and absolute value conversion.
 
@@ -100,7 +99,7 @@ class Wav:
                 self._channels = [self._data]
         
         if absolute:
-            self._channels = [abs(channel) for channel in self._channels]
+            self._channels = [np.abs(channel) for channel in self._channels]
 
     def plot(self):
         plt.plot(self.time, self.data, label="Left channel")
@@ -110,7 +109,7 @@ class Wav:
         plt.ylabel("Amplitude")
         plt.show()
     
-    def init_amplitude_list(self, time_unit='', norm=True):
+    def init_amplitude_list(self, time_unit: str | None=None, norm: bool=True):
         """
         Initializes a list of amplitude values sampled across time.
 
@@ -140,16 +139,10 @@ class Wav:
         - If the audio is multi-channel, the maximum amplitude across all channels is used per sample.
         - Normalization scales each channel individually before sampling if `norm` is True.
         """
-        num_samples = len(self.time)
-        match time_unit:
-            case 's':
-                num_samples = int(max(self.time))
-            case 'ms':
-                num_samples = int(max(self.time) * 1000)
-            case 'us':
-                num_samples = int(max(self.time) * 1000000)
-            case '':
-                pass
+        if time_unit:
+            num_samples = int(max(self._time)) * Time_Unit[time_unit].value
+        else:
+            num_samples = len(self.time) 
 
         self._split_channels(norm, True)
 
@@ -190,9 +183,13 @@ class Wav:
         return self._time
 
     @property
-    def amplitude_list(self) -> list:
+    def amplitude_list(self) -> list | Exception:
         """List of peak amplitude values per time unit."""
-        return self._amplitude_list
+        if self._amplitude_list:
+            return self._amplitude_list
+        else:
+            raise Exception("The amplitude list has not yet been set. Initialize it using 'init_amplitude_list'.")
+
     
     @property
     def num_channels(self) -> int:
